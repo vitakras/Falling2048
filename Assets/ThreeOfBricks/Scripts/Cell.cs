@@ -1,17 +1,29 @@
-﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Cell : MonoBehaviour {
 
-    public GameTile tile;
+    public GameObject tile;
 
-	// Use this for initialization
-	void Start () {
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    private GameTile gameTile;
+    private bool active;
+
+    // Use this for initialization
+    void Start() {
+        gameTile = GetComponent<GameTile>();
+        Active = false;
+    }
+
+    public bool Active {
+        get {
+            return this.active;
+        }
+        set {
+            this.active = value;
+            tile.SetActive(this.active);
+        }
+    }
+
+    public GameTile GetTile() {
+        return gameTile;
+    }
 }

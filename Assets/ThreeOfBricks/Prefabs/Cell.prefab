@@ -73,6 +73,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3de9a365fa96d44490ec44ee6eade4d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  number: 0
   background: {fileID: 114911889006307552}
   score: {fileID: 114359455582252592}
 --- !u!114 &114359455582252592
@@ -119,7 +120,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7fee78818613ea14ba30e177432474f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tile: {fileID: 114074541969049398}
+  tile: {fileID: 1394101020131656}
 --- !u!114 &114911889006307552
 MonoBehaviour:
   m_ObjectHideFlags: 1
