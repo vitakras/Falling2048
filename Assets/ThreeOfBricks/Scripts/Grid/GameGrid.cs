@@ -17,12 +17,12 @@ public class GameGrid : MonoBehaviour {
         return cells;
     }
 
-    public Cell GetCell(int row, int column) {
-        return cells[row, column];
-    }
+    public Cell GetCell(CellPosition position) {
+        if (CellPositionExistsOnGrid(position)) {
+            return cells[position.x, position.y];
+        }
 
-    public void Reset() {
-
+        return null;
     }
 
     void PopulateGrid() {
@@ -42,5 +42,14 @@ public class GameGrid : MonoBehaviour {
         Cell cell = newCell.GetComponent<Cell>();
         cell.Position = new CellPosition(x, y);
         return cell;
+    }
+
+    bool CellPositionExistsOnGrid(CellPosition position) {
+        if (position.x >= 0 && position.y >= 0 &&
+            position.x < rows && position.y < columns) {
+            return true;
+        }
+
+        return false;
     }
 }
