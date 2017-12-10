@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [System.Serializable]
-public class GameTile : MonoBehaviour {
+public class TileView : MonoBehaviour {
 
     public int number;
     public Image background;

@@ -2,15 +2,19 @@ using UnityEngine;
 
 public class GameGrid : MonoBehaviour {
 
-    public GameObject cell;
+    public GameObject cellPrefab;
     public int rows;
     public int columns;
 
     private Cell[,] cells;
 
     // Use this for initialization
-    void Start() {
+    void Awake() {
         PopulateGrid();
+    }
+
+    public Cell[,] GetAllCells() {
+        return cells;
     }
 
     public Cell GetCell(int row, int column) {
@@ -18,11 +22,7 @@ public class GameGrid : MonoBehaviour {
     }
 
     public void Reset() {
-        for (int i = 0; i < columns; i++) {
-            for (int j = 0; j < rows; j++) {
-                cells[j, i].Active = false;
-            }
-        }
+
     }
 
     void PopulateGrid() {
@@ -30,10 +30,17 @@ public class GameGrid : MonoBehaviour {
 
         for (int i = 0; i < columns; i++) {
             for (int j = 0; j < rows; j++) {
-                GameObject newCell = GameObject.Instantiate(cell);
-                newCell.transform.SetParent(this.transform, false);
-                cells[j, i] = newCell.GetComponent<Cell>();
+                cells[j, i] = CreateNewCell(j, i);
             }
         }
+    }
+
+    Cell CreateNewCell(int x, int y) {
+        GameObject newCell = GameObject.Instantiate(cellPrefab);
+        newCell.transform.SetParent(this.transform, false);
+
+        Cell cell = newCell.GetComponent<Cell>();
+        cell.Position = new CellPosition(x, y);
+        return cell;
     }
 }
