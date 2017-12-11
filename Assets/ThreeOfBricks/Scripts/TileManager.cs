@@ -14,15 +14,13 @@ public class TileManager : MonoBehaviour {
         CreateTiles();
         activeTile = new Tile(gameGrid, new CellPosition(2, 0));
         activeTile.ActiveTile = true;
+        StartCoroutine(Fall());
     }
 
     // Update is called once per frame
     void Update() {
         Tile tile = null;
-        if (Input.GetKeyDown(KeyCode.W)) {
-            tile = activeTile.FindNeighbourTile(Vector2.up);
-        }
-        else if (Input.GetKeyDown(KeyCode.A)) {
+        if (Input.GetKeyDown(KeyCode.A)) {
             tile = activeTile.FindNeighbourTile(Vector2.left);
         }
         else if (Input.GetKeyDown(KeyCode.D)) {
@@ -47,10 +45,16 @@ public class TileManager : MonoBehaviour {
         }
     }
 
-    void MoveTile(Vector2 dir) {
+    IEnumerator Fall() {
+        Tile tile = activeTile.FindNeighbourTile(Vector2.down);
+        while(tile != null && !tile.ActiveTile) {
+            yield return new WaitForSeconds(1);
+            activeTile.MoveToTile(tile);
+            tile = activeTile.FindNeighbourTile(Vector2.down);
+        }
 
+        Debug.Log("Done Falling");
     }
-
 
 
 }
