@@ -7,15 +7,35 @@ public class TileManager : MonoBehaviour {
     public GameObject tilePrefab;
     public GameGrid gameGrid;
 
-	// Use this for initialization
-	void Start () {
+    private Tile activeTile;
+
+    // Use this for initialization
+    void Start() {
         CreateTiles();
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+        activeTile = new Tile(gameGrid, new CellPosition(2, 0));
+        activeTile.ActiveTile = true;
+    }
+
+    // Update is called once per frame
+    void Update() {
+        Tile tile = null;
+        if (Input.GetKeyDown(KeyCode.W)) {
+            tile = activeTile.FindNeighbourTile(Vector2.up);
+        }
+        else if (Input.GetKeyDown(KeyCode.A)) {
+            tile = activeTile.FindNeighbourTile(Vector2.left);
+        }
+        else if (Input.GetKeyDown(KeyCode.D)) {
+            tile = activeTile.FindNeighbourTile(Vector2.right);
+        }
+        else if (Input.GetKeyDown(KeyCode.S)) {
+            tile = activeTile.FindNeighbourTile(Vector2.down);
+        }
+
+        if (tile != null) {
+            activeTile.MoveToTile(tile);
+        }
+    }
 
     void CreateTiles() {
         Cell[,] cells = gameGrid.GetAllCells();
@@ -28,9 +48,9 @@ public class TileManager : MonoBehaviour {
     }
 
     void MoveTile(Vector2 dir) {
-        
+
     }
 
-    
+
 
 }

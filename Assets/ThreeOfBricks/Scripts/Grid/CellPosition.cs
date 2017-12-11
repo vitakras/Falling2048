@@ -20,7 +20,7 @@ public struct CellPosition {
             return new CellPosition(x, y + 1);
         }
         else if (direction == Vector2.left) {
-            CellPosition newPosition = new CellPosition(x - 1, y);
+            return new CellPosition(x - 1, y);
         }
 
         // should throw an error
