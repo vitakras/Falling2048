@@ -8,14 +8,16 @@ public class TileManager : MonoBehaviour {
     public GameGrid gameGrid;
 
     private Tile activeTile;
+    private Coroutine fall;
 
     // Use this for initialization
     void Start() {
         CreateTiles();
         activeTile = new Tile(gameGrid, new CellPosition(2, 0));
         activeTile.ActiveTile = true;
-        StartCoroutine(Fall());
+        ResetFalling();
     }
+
 
     // Update is called once per frame
     void Update() {
@@ -27,11 +29,12 @@ public class TileManager : MonoBehaviour {
             tile = activeTile.FindNeighbourTile(Vector2.right);
         }
         else if (Input.GetKeyDown(KeyCode.S)) {
-            tile = activeTile.FindNeighbourTile(Vector2.down);
+            tile = FindFloor(activeTile);
         }
 
         if (tile != null) {
             activeTile.MoveToTile(tile);
+            ResetFalling();
         }
     }
 
@@ -46,6 +49,7 @@ public class TileManager : MonoBehaviour {
     }
 
     IEnumerator Fall() {
+        Debug.Log("Created");
         Tile tile = activeTile.FindNeighbourTile(Vector2.down);
         while(tile != null && !tile.ActiveTile) {
             yield return new WaitForSeconds(1);
@@ -56,5 +60,22 @@ public class TileManager : MonoBehaviour {
         Debug.Log("Done Falling");
     }
 
+    void ResetFalling() {
+        if (fall != null) {
+            StopCoroutine(fall);
+        }
+
+        fall = StartCoroutine(Fall());
+    }
+
+    Tile FindFloor(Tile tile) {
+        Tile nextTile = tile.FindNeighbourTile(Vector2.down);
+        while(nextTile != null && !nextTile.ActiveTile) {
+            tile = nextTile;
+            nextTile = tile.FindNeighbourTile(Vector2.down);
+        }
+
+        return tile;
+    }
 
 }
