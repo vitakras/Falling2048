@@ -25,7 +25,7 @@ public class TileStyles : ScriptableObject {
         }
     }
 
-    public void ApplyStyle(TileView tile) {
+    public void ApplyStyle(NumberTile tile) {
         TileStyle style = defaultStyle;
         if (!styles.TryGetValue(tile.number, out style)) {
             style = defaultStyle;
@@ -34,7 +34,7 @@ public class TileStyles : ScriptableObject {
         ApplyTileStyle(style, tile);
     }
 
-    private void ApplyTileStyle(TileStyle style, TileView tile) {
+    private void ApplyTileStyle(TileStyle style, NumberTile tile) {
         tile.SetBackground(background);
         tile.SetBackgroundColor(style.tileColor);
         tile.SetTextColor(style.textColor);

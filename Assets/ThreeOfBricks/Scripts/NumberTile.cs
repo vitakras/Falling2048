@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [System.Serializable]
-public class TileView : MonoBehaviour {
+public class NumberTile : MonoBehaviour {
 
     public int number;
     public Image background;
@@ -41,5 +41,5 @@ public class TileView : MonoBehaviour {
 }
 
 public interface INumberUpdateHandler {
-    void OnNumberUpdated(TileView tileView);
+    void OnNumberUpdated(NumberTile numberTile);
 }

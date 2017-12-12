@@ -7,7 +7,7 @@ public class Tile {
 
     private GameGrid grid;
     private Cell cell;
-    private TileView tileView;
+    private NumberTile numberTile;
 
     public Tile(GameGrid grid, CellPosition position) {
         this.grid = grid;
@@ -47,7 +47,7 @@ public class Tile {
 
     private void Copy(Tile tile) {
         this.cell = tile.cell;
-        this.tileView = tile.tileView;
+        this.numberTile = tile.numberTile;
     }
 
     Cell FindNeighbourCell(Vector2 direction) {
