@@ -14,6 +14,10 @@ public class Tile {
         UpdateCell(position);
     }
 
+    public void SetNumber(int number) {
+        numberTile.Number = number;
+    }
+
     public bool ActiveTile {
         set {
             cell.SetChildActive(value);
@@ -47,6 +51,7 @@ public class Tile {
 
     private void Copy(Tile tile) {
         this.cell = tile.cell;
+        tile.numberTile.Number = this.numberTile.Number;
         this.numberTile = tile.numberTile;
     }
 
@@ -61,5 +66,6 @@ public class Tile {
 
     void UpdateCell(CellPosition position) {
         cell = grid.GetCell(position);
+        numberTile = cell.GetChild().GetComponent<NumberTile>();
     }
 }

@@ -19,13 +19,15 @@ public class TileStyles : ScriptableObject {
     private Dictionary<int, TileStyle> styles;
 
     public void Awake() {
-        styles = new Dictionary<int, TileStyle>();
-        foreach (TileStyle style in tilesStyleList) {
-            styles.Add(style.number, style);
-        }
+        Initialize();
     }
 
     public void ApplyStyle(NumberTile tile) {
+        if (styles == null) {
+            Initialize();
+            Debug.Log("Style Initialized");
+        }
+
         TileStyle style = defaultStyle;
         if (!styles.TryGetValue(tile.number, out style)) {
             style = defaultStyle;
@@ -38,5 +40,12 @@ public class TileStyles : ScriptableObject {
         tile.SetBackground(background);
         tile.SetBackgroundColor(style.tileColor);
         tile.SetTextColor(style.textColor);
+    }
+
+    private void Initialize() {
+        styles = new Dictionary<int, TileStyle>();
+        foreach (TileStyle style in tilesStyleList) {
+            styles.Add(style.number, style);
+        }
     }
 }

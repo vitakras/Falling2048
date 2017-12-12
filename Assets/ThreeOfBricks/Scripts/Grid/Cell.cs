@@ -11,6 +11,10 @@ public class Cell : MonoBehaviour {
         SetChildActive(active);
     }
 
+    public GameObject GetChild() {
+        return child;
+    }
+
     public void SetChildActive(bool active) {
         this.child.SetActive(active);
     }
