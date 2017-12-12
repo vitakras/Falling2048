@@ -13,8 +13,7 @@ public class TileManager : MonoBehaviour {
     // Use this for initialization
     void Start() {
         CreateTiles();
-        activeTile = new Tile(gameGrid, new CellPosition(2, 0));
-        activeTile.ActiveTile = true;
+        GetNewActiveTile();
         ResetFalling();
     }
 
@@ -58,6 +57,8 @@ public class TileManager : MonoBehaviour {
         }
 
         Debug.Log("Done Falling");
+        GetNewActiveTile();
+        ResetFalling();
     }
 
     void ResetFalling() {
@@ -78,4 +79,9 @@ public class TileManager : MonoBehaviour {
         return tile;
     }
 
+    void GetNewActiveTile() {
+        activeTile = new Tile(gameGrid, new CellPosition(2, 0)) {
+            ActiveTile = true
+        };
+    }
 }
