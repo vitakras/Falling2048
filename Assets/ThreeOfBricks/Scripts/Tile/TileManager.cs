@@ -10,6 +10,7 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
 
     private NumberTile activeTile;
     private Coroutine fall;
+    private bool inputEnabled = true;
 
     // Use this for initialization
     void Start() {
@@ -18,9 +19,12 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
         ResetFalling();
     }
 
-
     // Update is called once per frame
     void Update() {
+        if (!inputEnabled) {
+            return;
+        }
+
         NumberTile tile = null;
         if (Input.GetKeyDown(KeyCode.A)) {
             tile = activeTile.FindNeighbourTile(Direction.left);
@@ -52,17 +56,22 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
 
     IEnumerator Fall() {
         Debug.Log("Created");
-        NumberTile tile = activeTile.FindNeighbourTile(Direction.down);
-        while (tile != null && !tile.Active) {
-            yield return new WaitForSeconds(1);
-            activeTile.MoveToTile(tile);
-            tile = activeTile.FindNeighbourTile(Direction.down);
-        }
-
+        yield return FallTile(activeTile);
         Debug.Log("Done Falling");
         MergeTiles();
         GetNewActiveTile();
         ResetFalling();
+    }
+
+    IEnumerator FallTile(NumberTile tile) {
+        Debug.Log("Created");
+        NumberTile neighbour = activeTile.FindNeighbourTile(Direction.down);
+        while (IsInactiveTile(neighbour)) {
+            yield return new WaitForSeconds(1);
+            tile.MoveToTile(neighbour);
+            neighbour = tile.FindNeighbourTile(Direction.down);
+        }
+        Debug.Log("Done Falling");
     }
 
     void MergeTiles() {
@@ -111,7 +120,7 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
         return tiles;
     }
 
-    void GetNewActiveTile(int number = 2048) {
+    void GetNewActiveTile(int number = 2) {
         activeTile = new NumberTile(gameGrid, new CellPosition(2, 0)) {
             Active = true
         };
@@ -124,5 +133,9 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
 
     bool IsActiveTile(NumberTile tile) {
         return tile != null && tile.Active;
+    }
+
+    bool IsInactiveTile(NumberTile tile) {
+        return tile != null && !tile.Active;
     }
 }
