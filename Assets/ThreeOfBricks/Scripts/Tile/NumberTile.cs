@@ -1,46 +1,58 @@
-using System;
-using UnityEngine;
-using UnityEngine.UI;
+public class NumberTile {
 
-[System.Serializable]
-public class NumberTile : MonoBehaviour {
+    private GameGrid grid;
+    private Cell cell;
+    private NumberTileView numberTile;
 
-    public int number;
-    public Image background;
-    public Text score;
-    public INumberUpdateHandler updateHandler;
+    public NumberTile(GameGrid grid, CellPosition position) {
+        this.grid = grid;
+        cell = grid.GetCell(position);
+        numberTile = cell.GetChild().GetComponent<NumberTileView>();
+    }
 
     public int Number {
+        set {
+            numberTile.Number = value;
+        }
         get {
-            return number;
+            return numberTile.Number;
         }
+    }
+
+    public bool Active {
         set {
-            number = value;
-            this.score.text = string.Format("{0}", number);
-            if (updateHandler != null) {
-                updateHandler.OnNumberUpdated(this);
+            cell.SetChildActive(value);
+        }
+        get {
+            if (cell != null) {
+                return cell.IsChildActive();
             }
+            return false;
         }
     }
 
-    public INumberUpdateHandler UpdateHandler {
-        set {
-            updateHandler = value;
+    public NumberTile FindNeighbourTile(Direction direction) {
+        CellPosition neighbourPosition = this.cell.Position.NeighbourPosition(direction);
+        if (this.grid.GetCell(neighbourPosition) != null) {
+            return new NumberTile(grid, neighbourPosition);
         }
+
+        return null;
     }
 
-    public void SetBackground(Sprite sprite) {
-        background.sprite = sprite;
-    }
-    public void SetBackgroundColor(Color color) {
-        background.color = color;
+    public bool MoveToTile(NumberTile tile) {
+        if (!tile.Active) {
+            Active = false;
+            CopyTileProperties(tile);
+            tile.Active = true;
+            return true;
+        }
+        return false;
     }
 
-    public void SetTextColor(Color color) {
-        this.score.color = color;
+    void CopyTileProperties(NumberTile tile) {
+        this.cell = tile.cell;
+        tile.numberTile.Number = this.numberTile.Number;
+        this.numberTile = tile.numberTile;
     }
-}
-
-public interface INumberUpdateHandler {
-    void OnNumberUpdated(NumberTile numberTile);
 }

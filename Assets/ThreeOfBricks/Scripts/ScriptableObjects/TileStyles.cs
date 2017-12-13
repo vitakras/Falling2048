@@ -22,7 +22,7 @@ public class TileStyles : ScriptableObject {
         Initialize();
     }
 
-    public void ApplyStyle(NumberTile tile) {
+    public void ApplyStyle(NumberTileView tile) {
         if (styles == null) {
             Initialize();
             Debug.Log("Style Initialized");
@@ -36,7 +36,7 @@ public class TileStyles : ScriptableObject {
         ApplyTileStyle(style, tile);
     }
 
-    private void ApplyTileStyle(TileStyle style, NumberTile tile) {
+    private void ApplyTileStyle(TileStyle style, NumberTileView tile) {
         tile.SetBackground(background);
         tile.SetBackgroundColor(style.tileColor);
         tile.SetTextColor(style.textColor);

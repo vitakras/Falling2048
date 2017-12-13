@@ -8,7 +8,7 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
     public GameGrid gameGrid;
     public TileStyles style;
 
-    private Tile activeTile;
+    private NumberTile activeTile;
     private Coroutine fall;
 
     // Use this for initialization
@@ -21,7 +21,7 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
 
     // Update is called once per frame
     void Update() {
-        Tile tile = null;
+        NumberTile tile = null;
         if (Input.GetKeyDown(KeyCode.A)) {
             tile = activeTile.FindNeighbourTile(Direction.left);
         }
@@ -43,7 +43,7 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
         for (int j = 0; j < gameGrid.columns; j++) {
             for (int i = 0; i < gameGrid.rows; i++) {
                 GameObject tile = GameObject.Instantiate(numberedTilePrefab);
-                NumberTile numberTile = tile.GetComponent<NumberTile>();
+                NumberTileView numberTile = tile.GetComponent<NumberTileView>();
                 numberTile.UpdateHandler = this;
                 cells[i, j].SetChild(tile, false);
             }
@@ -52,8 +52,8 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
 
     IEnumerator Fall() {
         Debug.Log("Created");
-        Tile tile = activeTile.FindNeighbourTile(Direction.down);
-        while (tile != null && !tile.ActiveTile) {
+        NumberTile tile = activeTile.FindNeighbourTile(Direction.down);
+        while (tile != null && !tile.Active) {
             yield return new WaitForSeconds(1);
             activeTile.MoveToTile(tile);
             tile = activeTile.FindNeighbourTile(Direction.down);
@@ -66,7 +66,7 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
     }
 
     void MergeTiles() {
-        List<Tile> tiles = FindEqualTilesInDirection(activeTile, Direction.left);
+        List<NumberTile> tiles = FindEqualTilesInDirection(activeTile, Direction.left);
         tiles.AddRange(FindEqualTilesInDirection(activeTile, Direction.right));
         tiles.AddRange(FindEqualTilesInDirection(activeTile, Direction.down));
 
@@ -74,8 +74,8 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
             return;
         }
 
-        int multiplier = (int) Mathf.Pow(2, tiles.Count);
-        activeTile.SetNumber(multiplier * activeTile.GetNumber());
+        int multiplier = (int)Mathf.Pow(2, tiles.Count);
+        activeTile.Number = (multiplier * activeTile.Number);
     }
 
     void ResetFalling() {
@@ -86,9 +86,9 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
         fall = StartCoroutine(Fall());
     }
 
-    Tile FindFloorTile(Tile tile) {
-        Tile nextTile = tile.FindNeighbourTile(Direction.down);
-        while (nextTile != null && !nextTile.ActiveTile) {
+    NumberTile FindFloorTile(NumberTile tile) {
+        NumberTile nextTile = tile.FindNeighbourTile(Direction.down);
+        while (nextTile != null && !nextTile.Active) {
             tile = nextTile;
             nextTile = tile.FindNeighbourTile(Direction.down);
         }
@@ -96,11 +96,11 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
         return tile;
     }
 
-    List<Tile> FindEqualTilesInDirection(Tile tile, Direction dir) {
-        List<Tile> tiles = new List<Tile>();
-        Tile neighbourTile = tile.FindNeighbourTile(dir);
+    List<NumberTile> FindEqualTilesInDirection(NumberTile tile, Direction dir) {
+        List<NumberTile> tiles = new List<NumberTile>();
+        NumberTile neighbourTile = tile.FindNeighbourTile(dir);
         while (IsActiveTile(neighbourTile)) {
-            if (neighbourTile.GetNumber() != tile.GetNumber()) {
+            if (neighbourTile.Number != tile.Number) {
                 break;
             }
 
@@ -112,17 +112,17 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
     }
 
     void GetNewActiveTile(int number = 2048) {
-        activeTile = new Tile(gameGrid, new CellPosition(2, 0)) {
-            ActiveTile = true
+        activeTile = new NumberTile(gameGrid, new CellPosition(2, 0)) {
+            Active = true
         };
-        activeTile.SetNumber(number);
+        activeTile.Number = number;
     }
 
-    public void OnNumberUpdated(NumberTile numberTile) {
+    public void OnNumberUpdated(NumberTileView numberTile) {
         this.style.ApplyStyle(numberTile);
     }
 
-    bool IsActiveTile(Tile tile) {
-        return tile != null && tile.ActiveTile;
+    bool IsActiveTile(NumberTile tile) {
+        return tile != null && tile.Active;
     }
 }
