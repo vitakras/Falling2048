@@ -8,7 +8,6 @@ public class GameGrid : MonoBehaviour {
 
     private Cell[,] cells;
 
-    // Use this for initialization
     void Awake() {
         PopulateGrid();
     }

@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Tile {
@@ -34,7 +31,7 @@ public class Tile {
         }
     }
 
-    public Tile FindNeighbourTile(Vector2 direction) {
+    public Tile FindNeighbourTile(Direction direction) {
         CellPosition neighbourPosition = this.cell.Position.NeighbourPosition(direction);
         if (this.grid.GetCell(neighbourPosition) != null) {
             return new Tile(grid, neighbourPosition);
@@ -59,7 +56,7 @@ public class Tile {
         this.numberTile = tile.numberTile;
     }
 
-    Cell FindNeighbourCell(Vector2 direction) {
+    Cell FindNeighbourCell(Direction direction) {
         CellPosition neighbourPosition = this.cell.Position.NeighbourPosition(direction);
         return grid.GetCell(neighbourPosition);
     }

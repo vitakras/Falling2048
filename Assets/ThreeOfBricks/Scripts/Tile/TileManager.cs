@@ -23,10 +23,10 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
     void Update() {
         Tile tile = null;
         if (Input.GetKeyDown(KeyCode.A)) {
-            tile = activeTile.FindNeighbourTile(Vector2.left);
+            tile = activeTile.FindNeighbourTile(Direction.left);
         }
         else if (Input.GetKeyDown(KeyCode.D)) {
-            tile = activeTile.FindNeighbourTile(Vector2.right);
+            tile = activeTile.FindNeighbourTile(Direction.right);
         }
         else if (Input.GetKeyDown(KeyCode.S)) {
             tile = FindFloorTile(activeTile);
@@ -52,11 +52,11 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
 
     IEnumerator Fall() {
         Debug.Log("Created");
-        Tile tile = activeTile.FindNeighbourTile(Vector2.down);
+        Tile tile = activeTile.FindNeighbourTile(Direction.down);
         while (tile != null && !tile.ActiveTile) {
             yield return new WaitForSeconds(1);
             activeTile.MoveToTile(tile);
-            tile = activeTile.FindNeighbourTile(Vector2.down);
+            tile = activeTile.FindNeighbourTile(Direction.down);
         }
 
         Debug.Log("Done Falling");
@@ -66,9 +66,9 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
     }
 
     void MergeTiles() {
-        List<Tile> tiles = FindEqualTilesInDirection(activeTile, Vector2.left);
-        tiles.AddRange(FindEqualTilesInDirection(activeTile, Vector2.right));
-        tiles.AddRange(FindEqualTilesInDirection(activeTile, Vector2.down));
+        List<Tile> tiles = FindEqualTilesInDirection(activeTile, Direction.left);
+        tiles.AddRange(FindEqualTilesInDirection(activeTile, Direction.right));
+        tiles.AddRange(FindEqualTilesInDirection(activeTile, Direction.down));
 
         if (tiles.Count == 0) {
             return;
@@ -87,16 +87,16 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
     }
 
     Tile FindFloorTile(Tile tile) {
-        Tile nextTile = tile.FindNeighbourTile(Vector2.down);
+        Tile nextTile = tile.FindNeighbourTile(Direction.down);
         while (nextTile != null && !nextTile.ActiveTile) {
             tile = nextTile;
-            nextTile = tile.FindNeighbourTile(Vector2.down);
+            nextTile = tile.FindNeighbourTile(Direction.down);
         }
 
         return tile;
     }
 
-    List<Tile> FindEqualTilesInDirection(Tile tile, Vector2 dir) {
+    List<Tile> FindEqualTilesInDirection(Tile tile, Direction dir) {
         List<Tile> tiles = new List<Tile>();
         Tile neighbourTile = tile.FindNeighbourTile(dir);
         while (IsActiveTile(neighbourTile)) {

@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public struct CellPosition {
     public int x;
     public int y;
@@ -9,21 +7,20 @@ public struct CellPosition {
         this.y = y;
     }
 
-    public CellPosition NeighbourPosition(Vector2 direction) {
-        if (direction == Vector2.up) {
+    public CellPosition NeighbourPosition(Direction direction) {
+        if (direction == Direction.up) {
             return new CellPosition(x, y - 1);
         }
-        else if (direction == Vector2.right) {
+        else if (direction == Direction.right) {
             return new CellPosition(x + 1, y);
         }
-        else if (direction == Vector2.down) {
+        else if (direction == Direction.down) {
             return new CellPosition(x, y + 1);
         }
-        else if (direction == Vector2.left) {
+        else if (direction == Direction.left) {
             return new CellPosition(x - 1, y);
         }
 
-        // should throw an error
         return new CellPosition(-1, -1);
     }
 }
