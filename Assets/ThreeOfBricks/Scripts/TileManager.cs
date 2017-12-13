@@ -29,7 +29,7 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
             tile = activeTile.FindNeighbourTile(Vector2.right);
         }
         else if (Input.GetKeyDown(KeyCode.S)) {
-            tile = FindFloor(activeTile);
+            tile = FindFloorTile(activeTile);
         }
 
         if (tile != null) {
@@ -60,8 +60,22 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
         }
 
         Debug.Log("Done Falling");
+        MergeTiles();
         GetNewActiveTile();
         ResetFalling();
+    }
+
+    void MergeTiles() {
+        List<Tile> tiles = FindEqualTilesInDirection(activeTile, Vector2.left);
+        tiles.AddRange(FindEqualTilesInDirection(activeTile, Vector2.right));
+        tiles.AddRange(FindEqualTilesInDirection(activeTile, Vector2.down));
+
+        if (tiles.Count == 0) {
+            return;
+        }
+
+        int multiplier = (int) Mathf.Pow(2, tiles.Count);
+        activeTile.SetNumber(multiplier * activeTile.GetNumber());
     }
 
     void ResetFalling() {
@@ -72,7 +86,7 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
         fall = StartCoroutine(Fall());
     }
 
-    Tile FindFloor(Tile tile) {
+    Tile FindFloorTile(Tile tile) {
         Tile nextTile = tile.FindNeighbourTile(Vector2.down);
         while (nextTile != null && !nextTile.ActiveTile) {
             tile = nextTile;
@@ -80,6 +94,21 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
         }
 
         return tile;
+    }
+
+    List<Tile> FindEqualTilesInDirection(Tile tile, Vector2 dir) {
+        List<Tile> tiles = new List<Tile>();
+        Tile neighbourTile = tile.FindNeighbourTile(dir);
+        while (IsActiveTile(neighbourTile)) {
+            if (neighbourTile.GetNumber() != tile.GetNumber()) {
+                break;
+            }
+
+            tiles.Add(neighbourTile);
+            neighbourTile = neighbourTile.FindNeighbourTile(dir);
+        }
+
+        return tiles;
     }
 
     void GetNewActiveTile(int number = 2048) {
@@ -91,5 +120,9 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
 
     public void OnNumberUpdated(NumberTile numberTile) {
         this.style.ApplyStyle(numberTile);
+    }
+
+    bool IsActiveTile(Tile tile) {
+        return tile != null && tile.ActiveTile;
     }
 }

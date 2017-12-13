@@ -18,6 +18,10 @@ public class Tile {
         numberTile.Number = number;
     }
 
+    public int GetNumber() {
+        return numberTile.Number;
+    }
+
     public bool ActiveTile {
         set {
             cell.SetChildActive(value);
