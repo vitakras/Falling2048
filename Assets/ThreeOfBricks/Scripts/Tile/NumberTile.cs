@@ -110,7 +110,7 @@ public class NumberTile {
         return tile != null && !tile.Active;
     }
 
-    public bool IsActiveTile(NumberTile tile) {
+    public static bool IsActiveTile(NumberTile tile) {
         return tile != null && tile.Active;
     }
 }

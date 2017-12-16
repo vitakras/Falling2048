@@ -29,7 +29,7 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
 
     // Update is called once per frame
     void Update() {
-        if (!inputEnabled || IsInactiveTile(activeTile)) {
+        if (!inputEnabled || NumberTile.IsInactiveTile(activeTile)) {
             return;
         }
         HandlePlayerInput();
@@ -143,7 +143,7 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
 
     NumberTile TryToDropTileAbove(NumberTile tile) {
         NumberTile neighbour = tile.FindNeighbourTile(Direction.up);
-        if (IsActiveTile(neighbour)) {
+        if (NumberTile.IsActiveTile(neighbour)) {
             DropTile(neighbour);
             return neighbour;
         }
@@ -161,7 +161,7 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
 
         foreach (Direction direction in mergeDirections) {
             NumberTile neighbour = tile.FindNeighbourTile(direction);
-            if (IsActiveTile(neighbour) && tile.IsEqualNumber(neighbour)) {
+            if (NumberTile.IsActiveTile(neighbour) && tile.IsEqualNumber(neighbour)) {
                 tiles.Add(neighbour);
             }
         }
@@ -174,14 +174,6 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
             this.score.IncreaseScore(tile.Number);
         }
         return tiles;
-    }
-
-    bool IsActiveTile(NumberTile tile) {
-        return tile != null && tile.Active;
-    }
-
-    bool IsInactiveTile(NumberTile tile) {
-        return tile != null && !tile.Active;
     }
 
     void PopulateGridWithNumberedTiles() {
