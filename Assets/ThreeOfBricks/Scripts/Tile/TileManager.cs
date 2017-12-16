@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class TileManager : MonoBehaviour, INumberUpdateHandler {
 
+    public RandomTileSelector randomTileSelector;
     public CellPosition activeTileSpawnPosition = new CellPosition(2, 0);
     public GameObject numberedTilePrefab;
     public GameGrid gameGrid;
@@ -70,8 +71,7 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
         activeTile = new NumberTile(gameGrid, activeTileSpawnPosition) {
             Active = true
         };
-        //TODO Set Tile From NumberSelect 
-        activeTile.Number = 2;
+        activeTile.Number = randomTileSelector.GetRandomTileNumber();
     }
 
     NumberTile ClearActiveTile() {
