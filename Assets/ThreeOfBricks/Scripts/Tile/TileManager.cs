@@ -11,6 +11,7 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
     private NumberTile activeTile;
     private Coroutine fall;
     private bool inputEnabled = true;
+    private bool playerMovedTile = false;
 
     // Use this for initialization
     void Start() {
@@ -22,6 +23,11 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
     // Update is called once per frame
     void Update() {
         if (!inputEnabled) {
+            return;
+        }
+
+        // We dont want player to controll the tiles if its inactive
+        if (IsInactiveTile(activeTile)) {
             return;
         }
 
@@ -37,8 +43,8 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
         }
 
         if (tile != null) {
+            playerMovedTile = true;
             activeTile.MoveToTile(tile);
-            ResetFalling();
         }
     }
 
@@ -55,36 +61,73 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
     }
 
     IEnumerator Fall() {
-        Debug.Log("Created");
-        yield return FallTile(activeTile);
-        Debug.Log("Done Falling");
-        MergeTiles();
+        yield return FallActiveTile();
+        NumberTile tile = activeTile;
+        activeTile = null;
+        List<NumberTile> tiles = MergeNeighbourTiles(tile);
+        DeActivateAndDropTileAbove(tiles);
         GetNewActiveTile();
         ResetFalling();
     }
 
-    IEnumerator FallTile(NumberTile tile) {
-        Debug.Log("Created");
+    IEnumerator FallActiveTile() {
+        Debug.Log("Tile Started Falling");
         NumberTile neighbour = activeTile.FindNeighbourTile(Direction.down);
         while (IsInactiveTile(neighbour)) {
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSeconds(0.5f);
+            if (!playerMovedTile) {
+                activeTile.MoveToTile(neighbour);
+            }
+            neighbour = activeTile.FindNeighbourTile(Direction.down);
+            playerMovedTile = false;
+        }
+        Debug.Log("Tile Finished Falling");
+    }
+
+
+
+    IEnumerator FallTile(NumberTile tile) {
+        Debug.Log("Tile Started Falling");
+        NumberTile neighbour = tile.FindNeighbourTile(Direction.down);
+        while (IsInactiveTile(neighbour)) {
+            yield return new WaitForSeconds(0.5f);
             tile.MoveToTile(neighbour);
             neighbour = tile.FindNeighbourTile(Direction.down);
         }
-        Debug.Log("Done Falling");
+        Debug.Log("Tile Finished Falling");
     }
 
-    void MergeTiles() {
-        List<NumberTile> tiles = FindEqualTilesInDirection(activeTile, Direction.left);
-        tiles.AddRange(FindEqualTilesInDirection(activeTile, Direction.right));
-        tiles.AddRange(FindEqualTilesInDirection(activeTile, Direction.down));
+    IEnumerator FallAndMergeTile(NumberTile tile) {
+        yield return FallTile(tile);
+        List<NumberTile> tiles = MergeNeighbourTiles(tile);
 
-        if (tiles.Count == 0) {
-            return;
+        DeActivateAndDropTileAbove(tiles);
+    }
+
+    void DeActivateAndDropTileAbove(List<NumberTile> tiles) {
+        foreach (NumberTile tile in tiles) {
+            tile.DeActivate();
+            NumberTile neighbour = tile.FindNeighbourTile(Direction.up);
+            if (IsActiveTile(neighbour)) {
+                StartCoroutine(FallAndMergeTile(neighbour));
+            }
+        }
+    }
+
+    List<NumberTile> MergeNeighbourTiles(NumberTile tile) {
+        Direction[] directions = new Direction[] { Direction.left, Direction.right, Direction.down };
+        List<NumberTile> tiles = new List<NumberTile>();
+
+        foreach (Direction direction in directions) {
+            NumberTile neighbour = tile.FindNeighbourTile(direction);
+            if (IsActiveTile(neighbour) && tile.IsEqualNumber(neighbour)) {
+                tiles.Add(neighbour);
+            }
         }
 
         int multiplier = (int)Mathf.Pow(2, tiles.Count);
-        activeTile.Number = (multiplier * activeTile.Number);
+        tile.Multiply(multiplier);
+        return tiles;
     }
 
     void ResetFalling() {
@@ -103,21 +146,6 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
         }
 
         return tile;
-    }
-
-    List<NumberTile> FindEqualTilesInDirection(NumberTile tile, Direction dir) {
-        List<NumberTile> tiles = new List<NumberTile>();
-        NumberTile neighbourTile = tile.FindNeighbourTile(dir);
-        while (IsActiveTile(neighbourTile)) {
-            if (neighbourTile.Number != tile.Number) {
-                break;
-            }
-
-            tiles.Add(neighbourTile);
-            neighbourTile = neighbourTile.FindNeighbourTile(dir);
-        }
-
-        return tiles;
     }
 
     void GetNewActiveTile(int number = 2) {

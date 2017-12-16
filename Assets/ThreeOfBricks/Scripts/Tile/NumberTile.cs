@@ -50,6 +50,22 @@ public class NumberTile {
         return false;
     }
 
+    public bool IsEqualNumber(NumberTile tile) {
+        return this.Number == tile.Number;
+    }
+
+    public void Multiply(int multiplier) {
+        this.Number = this.Number * multiplier;
+    }
+
+    public void DeActivate() {
+        this.Active = false;
+    }
+
+    public void Activate() {
+        this.Active = true;
+    }
+
     void CopyTileProperties(NumberTile tile) {
         this.cell = tile.cell;
         tile.numberTile.Number = this.numberTile.Number;
