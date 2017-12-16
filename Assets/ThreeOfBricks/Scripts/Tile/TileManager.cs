@@ -12,9 +12,11 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
     private Coroutine fall;
     private bool inputEnabled = true;
     private bool playerMovedTile = false;
+    private Queue<Coroutine> coroutines;
 
     // Use this for initialization
     void Start() {
+        coroutines = new Queue<Coroutine>();
         CreateNumberedTiles();
         GetNewActiveTile();
         ResetFalling();
@@ -66,6 +68,8 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
         activeTile = null;
         List<NumberTile> tiles = MergeNeighbourTiles(tile);
         DeActivateAndDropTileAbove(tiles);
+        yield return WaitForBlocksToStopFalling();
+        yield return new WaitForSeconds(1);
         GetNewActiveTile();
         ResetFalling();
     }
@@ -83,8 +87,6 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
         }
         Debug.Log("Tile Finished Falling");
     }
-
-
 
     IEnumerator FallTile(NumberTile tile) {
         Debug.Log("Tile Started Falling");
@@ -104,12 +106,21 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
         DeActivateAndDropTileAbove(tiles);
     }
 
+    IEnumerator WaitForBlocksToStopFalling() {
+        Debug.Log("WAiting for " + coroutines.Count);
+        while (coroutines.Count != 0) {
+            Debug.Log("WAiting for " + coroutines.Count);
+            yield return coroutines.Dequeue();
+        }
+    }
+
     void DeActivateAndDropTileAbove(List<NumberTile> tiles) {
         foreach (NumberTile tile in tiles) {
             tile.DeActivate();
             NumberTile neighbour = tile.FindNeighbourTile(Direction.up);
             if (IsActiveTile(neighbour)) {
-                StartCoroutine(FallAndMergeTile(neighbour));
+                Coroutine k = StartCoroutine(FallAndMergeTile(neighbour));
+                coroutines.Enqueue(k);
             }
         }
     }
