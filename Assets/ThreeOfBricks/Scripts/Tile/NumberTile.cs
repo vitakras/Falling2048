@@ -60,6 +60,16 @@ public class NumberTile {
         return MoveToTile(neighbour);
     }
 
+    public bool DropToFloor() {
+        NumberTile floorTile = FindFloorTile(this);
+        return MoveToTile(floorTile);
+    }
+
+    public bool IsOnFloor() {
+        NumberTile neighbour = FindNeighbourTile(Direction.down);
+        return neighbour == null || IsActiveTile(neighbour);
+    }
+
     public bool IsEqualNumber(NumberTile tile) {
         return this.Number == tile.Number;
     }
@@ -86,7 +96,7 @@ public class NumberTile {
         this.numberTile = tile.numberTile;
     }
 
-    NumberTile FindFloorTile(NumberTile tile) {
+    public static NumberTile FindFloorTile(NumberTile tile) {
         NumberTile nextTile = tile.FindNeighbourTile(Direction.down);
         while (IsInactiveTile(nextTile)) {
             tile = nextTile;
