@@ -3,6 +3,7 @@ public class NumberTile {
     private GameGrid grid;
     private Cell cell;
     private NumberTileView numberTile;
+    private INumberHandler numberHandler;
 
     public NumberTile(GameGrid grid, CellPosition position) {
         this.grid = grid;
@@ -20,7 +21,7 @@ public class NumberTile {
     }
 
     public bool Active {
-        set {
+        private set {
             cell.SetChildActive(value);
         }
         get {
@@ -29,6 +30,10 @@ public class NumberTile {
             }
             return false;
         }
+    }
+
+    public void SetNumberHandler(INumberHandler handler) {
+        numberHandler = handler;
     }
 
     public NumberTile FindNeighbourTile(Direction direction) {
@@ -41,13 +46,18 @@ public class NumberTile {
     }
 
     public bool MoveToTile(NumberTile tile) {
-        if (!tile.Active) {
+        if (IsInactiveTile(tile)) {
             this.DeActivate();
             CopyTileProperties(tile);
             tile.Activate();
             return true;
         }
         return false;
+    }
+
+    public bool MoveTile(Direction direction) {
+        NumberTile neighbour = FindNeighbourTile(direction);
+        return MoveToTile(neighbour);
     }
 
     public bool IsEqualNumber(NumberTile tile) {
@@ -75,4 +85,26 @@ public class NumberTile {
         tile.numberTile.Number = this.numberTile.Number;
         this.numberTile = tile.numberTile;
     }
+
+    NumberTile FindFloorTile(NumberTile tile) {
+        NumberTile nextTile = tile.FindNeighbourTile(Direction.down);
+        while (IsInactiveTile(nextTile)) {
+            tile = nextTile;
+            nextTile = tile.FindNeighbourTile(Direction.down);
+        }
+
+        return tile;
+    }
+
+    public static bool IsInactiveTile(NumberTile tile) {
+        return tile != null && !tile.Active;
+    }
+
+    public bool IsActiveTile(NumberTile tile) {
+        return tile != null && tile.Active;
+    }
+}
+
+public interface INumberHandler {
+
 }

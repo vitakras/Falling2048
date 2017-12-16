@@ -69,9 +69,8 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
     }
 
     void GetNewActiveTile() {
-        activeTile = new NumberTile(gameGrid, activeTileSpawnPosition) {
-            Active = true
-        };
+        activeTile = new NumberTile(gameGrid, activeTileSpawnPosition);
+        activeTile.Activate();
         activeTile.Number = randomTileSelector.GetRandomTileNumber();
     }
 
