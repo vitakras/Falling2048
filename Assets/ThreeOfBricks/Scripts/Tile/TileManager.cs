@@ -90,13 +90,11 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
 
     IEnumerator FallActiveTile() {
         Debug.Log("Tile Started Falling");
-        NumberTile neighbour = activeTile.FindNeighbourTile(Direction.down);
-        while (IsInactiveTile(neighbour)) {
+        while (!activeTile.IsOnFloor()) {
             yield return new WaitForSeconds(0.5f);
             if (!playerMovedTile) {
-                activeTile.MoveToTile(neighbour);
+                activeTile.MoveTile(Direction.down);
             }
-            neighbour = activeTile.FindNeighbourTile(Direction.down);
             playerMovedTile = false;
         }
         Debug.Log("Tile Finished Falling");
@@ -104,11 +102,9 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
 
     IEnumerator FallTile(NumberTile tile) {
         Debug.Log("Tile Started Falling");
-        NumberTile neighbour = tile.FindNeighbourTile(Direction.down);
-        while (IsInactiveTile(neighbour)) {
+        while (!tile.IsOnFloor()) {
             yield return new WaitForSeconds(0.5f);
-            tile.MoveToTile(neighbour);
-            neighbour = tile.FindNeighbourTile(Direction.down);
+            tile.MoveTile(Direction.down);
         }
         Debug.Log("Tile Finished Falling");
     }
