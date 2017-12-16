@@ -8,6 +8,7 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
     public GameObject numberedTilePrefab;
     public GameGrid gameGrid;
     public TileStyles style;
+    public InputHandler inputHandler;
 
     private NumberTile activeTile;
     private Coroutine fall;
@@ -26,34 +27,35 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
 
     // Update is called once per frame
     void Update() {
-        if (!inputEnabled) {
+        if (!inputEnabled || IsInactiveTile(activeTile)) {
             return;
         }
+        HandlePlayerInput();
+    }
 
-        // We dont want player to controll the tiles if its inactive
-        if (IsInactiveTile(activeTile)) {
-            return;
-        }
+    public void OnNumberUpdated(NumberTileView numberTile) {
+        this.style.ApplyStyle(numberTile);
+    }
 
+    void HandlePlayerInput() {
+        Direction direction = inputHandler.GetDirection();
         NumberTile tile = null;
-        if (Input.GetKeyDown(KeyCode.A)) {
-            tile = activeTile.FindNeighbourTile(Direction.left);
-        }
-        else if (Input.GetKeyDown(KeyCode.D)) {
-            tile = activeTile.FindNeighbourTile(Direction.right);
-        }
-        else if (Input.GetKeyDown(KeyCode.S)) {
-            tile = FindFloorTile(activeTile);
+        switch (direction) {
+            case Direction.left:
+            case Direction.right:
+                tile = activeTile.FindNeighbourTile(direction);
+                break;
+            case Direction.down:
+                tile = FindFloorTile(activeTile);
+                break;
+            default:
+                return;
         }
 
         if (tile != null) {
             playerMovedTile = true;
             activeTile.MoveToTile(tile);
         }
-    }
-
-    public void OnNumberUpdated(NumberTileView numberTile) {
-        this.style.ApplyStyle(numberTile);
     }
 
     void ResetFalling() {
