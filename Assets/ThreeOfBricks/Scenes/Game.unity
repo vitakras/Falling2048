@@ -552,6 +552,7 @@ GameObject:
   - component: {fileID: 768586208}
   - component: {fileID: 768586210}
   - component: {fileID: 768586211}
+  - component: {fileID: 768586212}
   m_Layer: 0
   m_Name: GameObject
   m_TagString: Untagged
@@ -571,6 +572,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   randomTileSelector: {fileID: 768586211}
+  score: {fileID: 768586212}
   numberedTilePrefab: {fileID: 1725982899306746, guid: e2903db630c85d045bf7cc61e847e0dd,
     type: 2}
   gameGrid: {fileID: 1949616247}
@@ -614,6 +616,18 @@ MonoBehaviour:
   numberTileView: {fileID: 894685385}
   selectableNumbers: 02000000040000000800000010000000200000004000000080000000
   style: {fileID: 11400000, guid: f45c89589e555654caee07dba2eb021d, type: 2}
+--- !u!114 &768586212
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 768586207}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: deef01e5346d11b439c8c26a5db4bb41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: {fileID: 559329529}
 --- !u!1 &775247298
 GameObject:
   m_ObjectHideFlags: 0

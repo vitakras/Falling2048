@@ -5,6 +5,7 @@ using UnityEngine;
 public class TileManager : MonoBehaviour, INumberUpdateHandler {
 
     public RandomTileSelector randomTileSelector;
+    public Score score;
     public CellPosition activeTileSpawnPosition = new CellPosition(2, 0);
     public GameObject numberedTilePrefab;
     public GameGrid gameGrid;
@@ -176,8 +177,13 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
             }
         }
 
+        int previousNumber = tile.Number;
         int multiplier = (int)Mathf.Pow(2, tiles.Count);
         tile.Multiply(multiplier);
+
+        if (previousNumber != tile.Number) {
+            this.score.IncreaseScore(tile.Number);
+        }
         return tiles;
     }
 
