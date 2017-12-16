@@ -42,9 +42,9 @@ public class NumberTile {
 
     public bool MoveToTile(NumberTile tile) {
         if (!tile.Active) {
-            Active = false;
+            this.DeActivate();
             CopyTileProperties(tile);
-            tile.Active = true;
+            tile.Activate();
             return true;
         }
         return false;
@@ -52,6 +52,10 @@ public class NumberTile {
 
     public bool IsEqualNumber(NumberTile tile) {
         return this.Number == tile.Number;
+    }
+
+    public bool IsSameCell(NumberTile tile) {
+        return this.cell == tile.cell;
     }
 
     public void Multiply(int multiplier) {

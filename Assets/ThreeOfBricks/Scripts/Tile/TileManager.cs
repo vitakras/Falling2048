@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class TileManager : MonoBehaviour, INumberUpdateHandler {
 
+    public CellPosition activeTileSpawnPosition = new CellPosition(2, 0);
     public GameObject numberedTilePrefab;
     public GameGrid gameGrid;
     public TileStyles style;
@@ -12,12 +13,13 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
     private Coroutine fall;
     private bool inputEnabled = true;
     private bool playerMovedTile = false;
-    private Queue<Coroutine> coroutines;
+    private Queue<Coroutine> fallingTilesQueue;
+    private readonly Direction[] mergeDirections = new Direction[] { Direction.left, Direction.right, Direction.down };
 
     // Use this for initialization
     void Start() {
-        coroutines = new Queue<Coroutine>();
-        CreateNumberedTiles();
+        fallingTilesQueue = new Queue<Coroutine>();
+        PopulateGridWithNumberedTiles();
         GetNewActiveTile();
         ResetFalling();
     }
@@ -50,28 +52,44 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
         }
     }
 
-    void CreateNumberedTiles() {
-        Cell[,] cells = gameGrid.GetAllCells();
-        for (int j = 0; j < gameGrid.columns; j++) {
-            for (int i = 0; i < gameGrid.rows; i++) {
-                GameObject tile = GameObject.Instantiate(numberedTilePrefab);
-                NumberTileView numberTile = tile.GetComponent<NumberTileView>();
-                numberTile.UpdateHandler = this;
-                cells[i, j].SetChild(tile, false);
-            }
-        }
+    public void OnNumberUpdated(NumberTileView numberTile) {
+        this.style.ApplyStyle(numberTile);
     }
 
-    IEnumerator Fall() {
-        yield return FallActiveTile();
+    void ResetFalling() {
+        if (fall != null) {
+            StopCoroutine(fall);
+        }
+
+        fall = StartCoroutine(MakeActiveTileFall());
+    }
+
+    void GetNewActiveTile() {
+        activeTile = new NumberTile(gameGrid, activeTileSpawnPosition) {
+            Active = true
+        };
+        //TODO Set Tile From NumberSelect 
+        activeTile.Number = 2;
+    }
+
+    NumberTile ClearActiveTile() {
         NumberTile tile = activeTile;
         activeTile = null;
-        List<NumberTile> tiles = MergeNeighbourTiles(tile);
-        DeActivateAndDropTileAbove(tiles);
-        yield return WaitForBlocksToStopFalling();
-        yield return new WaitForSeconds(1);
-        GetNewActiveTile();
-        ResetFalling();
+        return tile;
+    }
+
+    IEnumerator MakeActiveTileFall() {
+        if (this.activeTile != null) {
+            yield return FallActiveTile();
+            NumberTile previousActiveTile = ClearActiveTile();
+            List<NumberTile> mergedTiles = MergeNeighbourTiles(previousActiveTile);
+            SelectAndDropTiles(previousActiveTile, mergedTiles);
+
+            yield return WaitForBlocksToStopFalling();
+            yield return new WaitForSeconds(1);
+            GetNewActiveTile();
+            ResetFalling();
+        }
     }
 
     IEnumerator FallActiveTile() {
@@ -99,37 +117,57 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
         Debug.Log("Tile Finished Falling");
     }
 
-    IEnumerator FallAndMergeTile(NumberTile tile) {
+    IEnumerator DropAndMergeTile(NumberTile tile) {
         yield return FallTile(tile);
-        List<NumberTile> tiles = MergeNeighbourTiles(tile);
-
-        DeActivateAndDropTileAbove(tiles);
+        List<NumberTile> mergedTiles = MergeNeighbourTiles(tile);
+        SelectAndDropTiles(tile, mergedTiles);
     }
 
     IEnumerator WaitForBlocksToStopFalling() {
-        Debug.Log("WAiting for " + coroutines.Count);
-        while (coroutines.Count != 0) {
-            Debug.Log("WAiting for " + coroutines.Count);
-            yield return coroutines.Dequeue();
+        while (fallingTilesQueue.Count != 0) {
+            yield return fallingTilesQueue.Dequeue();
         }
     }
 
-    void DeActivateAndDropTileAbove(List<NumberTile> tiles) {
-        foreach (NumberTile tile in tiles) {
-            tile.DeActivate();
-            NumberTile neighbour = tile.FindNeighbourTile(Direction.up);
-            if (IsActiveTile(neighbour)) {
-                Coroutine k = StartCoroutine(FallAndMergeTile(neighbour));
-                coroutines.Enqueue(k);
+    void SelectAndDropTiles(NumberTile selectedTile, List<NumberTile> mergedTiles) {
+        if (mergedTiles.Count == 0) {
+            return;
+        }
+
+        bool dropSelectedTile = true;
+        foreach (NumberTile mergedTile in mergedTiles) {
+            mergedTile.DeActivate();
+
+            NumberTile neighbour = TryToDropTileAbove(mergedTile);
+            if (neighbour != null && selectedTile.IsSameCell(neighbour)) {
+                dropSelectedTile = false;
             }
         }
+
+        if (dropSelectedTile) {
+            DropTile(selectedTile);
+        }
+    }
+
+    NumberTile TryToDropTileAbove(NumberTile tile) {
+        NumberTile neighbour = tile.FindNeighbourTile(Direction.up);
+        if (IsActiveTile(neighbour)) {
+            DropTile(neighbour);
+            return neighbour;
+        }
+
+        return null;
+    }
+
+    void DropTile(NumberTile tile) {
+        Coroutine fallingCoroutine = StartCoroutine(DropAndMergeTile(tile));
+        fallingTilesQueue.Enqueue(fallingCoroutine);
     }
 
     List<NumberTile> MergeNeighbourTiles(NumberTile tile) {
-        Direction[] directions = new Direction[] { Direction.left, Direction.right, Direction.down };
         List<NumberTile> tiles = new List<NumberTile>();
 
-        foreach (Direction direction in directions) {
+        foreach (Direction direction in mergeDirections) {
             NumberTile neighbour = tile.FindNeighbourTile(direction);
             if (IsActiveTile(neighbour) && tile.IsEqualNumber(neighbour)) {
                 tiles.Add(neighbour);
@@ -141,33 +179,14 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
         return tiles;
     }
 
-    void ResetFalling() {
-        if (fall != null) {
-            StopCoroutine(fall);
-        }
-
-        fall = StartCoroutine(Fall());
-    }
-
     NumberTile FindFloorTile(NumberTile tile) {
         NumberTile nextTile = tile.FindNeighbourTile(Direction.down);
-        while (nextTile != null && !nextTile.Active) {
+        while (IsInactiveTile(nextTile)) {
             tile = nextTile;
             nextTile = tile.FindNeighbourTile(Direction.down);
         }
 
         return tile;
-    }
-
-    void GetNewActiveTile(int number = 2) {
-        activeTile = new NumberTile(gameGrid, new CellPosition(2, 0)) {
-            Active = true
-        };
-        activeTile.Number = number;
-    }
-
-    public void OnNumberUpdated(NumberTileView numberTile) {
-        this.style.ApplyStyle(numberTile);
     }
 
     bool IsActiveTile(NumberTile tile) {
@@ -176,5 +195,22 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
 
     bool IsInactiveTile(NumberTile tile) {
         return tile != null && !tile.Active;
+    }
+
+    void PopulateGridWithNumberedTiles() {
+        Cell[,] cells = gameGrid.GetAllCells();
+        for (int j = 0; j < gameGrid.columns; j++) {
+            for (int i = 0; i < gameGrid.rows; i++) {
+                cells[i, j].SetChild(InstantiateNumberedTile(), false);
+            }
+        }
+    }
+
+    GameObject InstantiateNumberedTile() {
+        GameObject tile = GameObject.Instantiate(numberedTilePrefab);
+        NumberTileView numberTile = tile.GetComponent<NumberTileView>();
+        numberTile.UpdateHandler = this;
+
+        return tile;
     }
 }
