@@ -41,22 +41,16 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
 
     void HandlePlayerInput() {
         Direction direction = inputHandler.GetDirection();
-        NumberTile tile = null;
         switch (direction) {
             case Direction.left:
             case Direction.right:
-                tile = activeTile.FindNeighbourTile(direction);
+                playerMovedTile = true;
+                activeTile.MoveTile(direction);
                 break;
             case Direction.down:
-                tile = FindFloorTile(activeTile);
+                playerMovedTile = true;
+                activeTile.DropToFloor();
                 break;
-            default:
-                return;
-        }
-
-        if (tile != null) {
-            playerMovedTile = true;
-            activeTile.MoveToTile(tile);
         }
     }
 
@@ -184,16 +178,6 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
             this.score.IncreaseScore(tile.Number);
         }
         return tiles;
-    }
-
-    NumberTile FindFloorTile(NumberTile tile) {
-        NumberTile nextTile = tile.FindNeighbourTile(Direction.down);
-        while (IsInactiveTile(nextTile)) {
-            tile = nextTile;
-            nextTile = tile.FindNeighbourTile(Direction.down);
-        }
-
-        return tile;
     }
 
     bool IsActiveTile(NumberTile tile) {
