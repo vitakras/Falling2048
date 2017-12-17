@@ -5,23 +5,33 @@ using UnityEngine;
 
 public class TileManager : MonoBehaviour, INumberUpdateHandler, INumberHandler {
 
+    public GameObject numberedTilePrefab;
+    public CellPosition activeTileSpawnPosition = new CellPosition(2, 0);
+    public float tileFallWaitInSeconds = 0.5f;
+    public float tileSpawnWaitInSeconds = 1f;
+
     public RandomTileSelector randomTileSelector;
     public Score score;
-    public CellPosition activeTileSpawnPosition = new CellPosition(2, 0);
-    public GameObject numberedTilePrefab;
     public GameGrid gameGrid;
     public TileStyles style;
     public InputHandler inputHandler;
 
     private NumberTile activeTile;
-    private Coroutine fall;
+    private IEnumerator fall;
     private bool inputEnabled = true;
     private Queue<Coroutine> fallingTilesQueue;
     private readonly Direction[] mergeDirections = new Direction[] { Direction.left, Direction.right, Direction.down };
+    private WaitForSeconds fallWait;
+    private WaitForSeconds spawnWait;
+
+    void Awake() {
+        fallingTilesQueue = new Queue<Coroutine>();
+        fallWait = new WaitForSeconds(tileFallWaitInSeconds);
+        spawnWait = new WaitForSeconds(tileSpawnWaitInSeconds);
+    }
 
     // Use this for initialization
     void Start() {
-        fallingTilesQueue = new Queue<Coroutine>();
         PopulateGridWithNumberedTiles();
         GetNewActiveTile();
         ResetFalling();
@@ -33,6 +43,16 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler, INumberHandler {
             return;
         }
         HandlePlayerInput();
+    }
+
+    public void Pause() {
+        if (fall != null) {
+            StopCoroutine(fall);
+        }
+    }
+
+    public void Resume() {
+        ResetFalling();
     }
 
     public void OnNumberUpdated(NumberTileView numberTile) {
@@ -68,8 +88,8 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler, INumberHandler {
         if (fall != null) {
             StopCoroutine(fall);
         }
-
-        fall = StartCoroutine(MakeActiveTileFall());
+        fall = MakeActiveTileFall();
+        StartCoroutine(fall);
     }
 
     void GetNewActiveTile() {
@@ -90,11 +110,12 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler, INumberHandler {
             yield return FallTile(activeTile);
             ClearActiveTile();
             yield return WaitForBlocksToStopFalling();
-            yield return new WaitForSeconds(1);
+            yield return spawnWait;
             if (!IsBoardFull()) {
                 GetNewActiveTile();
                 ResetFalling();
-            } else {
+            }
+            else {
                 Debug.Log("board is full");
             }
         }
@@ -107,7 +128,7 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler, INumberHandler {
     IEnumerator FallTile(NumberTile tile) {
         Debug.Log("Tile Started Falling");
         while (!tile.IsOnFloor()) {
-            yield return new WaitForSeconds(0.5f);
+            yield return fallWait;
             if (!tile.HasMoved) {
                 tile.MoveTile(Direction.down);
             }

@@ -1,3 +1,4 @@
+[System.Serializable]
 public struct CellPosition {
     public int x;
     public int y;
