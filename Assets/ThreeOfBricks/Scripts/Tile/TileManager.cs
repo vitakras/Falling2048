@@ -15,7 +15,6 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
     private NumberTile activeTile;
     private Coroutine fall;
     private bool inputEnabled = true;
-    private bool playerMovedTile = false;
     private Queue<Coroutine> fallingTilesQueue;
     private readonly Direction[] mergeDirections = new Direction[] { Direction.left, Direction.right, Direction.down };
 
@@ -44,11 +43,9 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
         switch (direction) {
             case Direction.left:
             case Direction.right:
-                playerMovedTile = true;
                 activeTile.MoveTile(direction);
                 break;
             case Direction.down:
-                playerMovedTile = true;
                 activeTile.DropToFloor();
                 break;
         }
@@ -76,7 +73,7 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
 
     IEnumerator MakeActiveTileFall() {
         if (this.activeTile != null) {
-            yield return FallActiveTile();
+            yield return FallTile(activeTile);
             NumberTile previousActiveTile = ClearActiveTile();
             List<NumberTile> mergedTiles = MergeNeighbourTiles(previousActiveTile);
             SelectAndDropTiles(previousActiveTile, mergedTiles);
@@ -88,23 +85,14 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
         }
     }
 
-    IEnumerator FallActiveTile() {
-        Debug.Log("Tile Started Falling");
-        while (!activeTile.IsOnFloor()) {
-            yield return new WaitForSeconds(0.5f);
-            if (!playerMovedTile) {
-                activeTile.MoveTile(Direction.down);
-            }
-            playerMovedTile = false;
-        }
-        Debug.Log("Tile Finished Falling");
-    }
-
     IEnumerator FallTile(NumberTile tile) {
         Debug.Log("Tile Started Falling");
         while (!tile.IsOnFloor()) {
             yield return new WaitForSeconds(0.5f);
-            tile.MoveTile(Direction.down);
+            if (!tile.HasMoved) {
+                tile.MoveTile(Direction.down);
+            }
+            tile.ResetMoved();
         }
         Debug.Log("Tile Finished Falling");
     }

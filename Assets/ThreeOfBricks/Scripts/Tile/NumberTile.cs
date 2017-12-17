@@ -4,6 +4,7 @@ public class NumberTile {
     private Cell cell;
     private NumberTileView numberTile;
     private INumberHandler numberHandler;
+    private bool hasMoved;
 
     public NumberTile(GameGrid grid, CellPosition position) {
         this.grid = grid;
@@ -32,8 +33,18 @@ public class NumberTile {
         }
     }
 
+    public bool HasMoved {
+        get {
+            return hasMoved;
+        }
+    }
+
     public void SetNumberHandler(INumberHandler handler) {
         numberHandler = handler;
+    }
+
+    public void ResetMoved() {
+        hasMoved = false;
     }
 
     public NumberTile FindNeighbourTile(Direction direction) {
@@ -48,8 +59,9 @@ public class NumberTile {
     public bool MoveToTile(NumberTile tile) {
         if (IsInactiveTile(tile)) {
             this.DeActivate();
-            CopyTileProperties(tile);
-            tile.Activate();
+            this.CopyTileProperties(tile);
+            this.Activate();
+            this.hasMoved = true;
             return true;
         }
         return false;
