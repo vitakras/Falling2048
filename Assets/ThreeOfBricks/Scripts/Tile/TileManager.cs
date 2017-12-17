@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TileManager : MonoBehaviour, INumberUpdateHandler {
+public class TileManager : MonoBehaviour, INumberUpdateHandler, INumberHandler {
 
     public RandomTileSelector randomTileSelector;
     public Score score;
@@ -38,6 +38,15 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
         this.style.ApplyStyle(numberTile);
     }
 
+    public void OnTileMoved(NumberTile tile, Direction direction) {
+
+    }
+
+    public void OnTileHitFloor(NumberTile tile) {
+        List<NumberTile> mergedTiles = MergeNeighbourTiles(tile);
+        SelectAndDropTiles(tile, mergedTiles);
+    }
+
     void HandlePlayerInput() {
         Direction direction = inputHandler.GetDirection();
         switch (direction) {
@@ -63,6 +72,7 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
         activeTile = new NumberTile(gameGrid, activeTileSpawnPosition);
         activeTile.Activate();
         activeTile.Number = randomTileSelector.GetRandomTileNumber();
+        activeTile.SetNumberHandler(this);
     }
 
     NumberTile ClearActiveTile() {
@@ -74,10 +84,7 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
     IEnumerator MakeActiveTileFall() {
         if (this.activeTile != null) {
             yield return FallTile(activeTile);
-            NumberTile previousActiveTile = ClearActiveTile();
-            List<NumberTile> mergedTiles = MergeNeighbourTiles(previousActiveTile);
-            SelectAndDropTiles(previousActiveTile, mergedTiles);
-
+            ClearActiveTile();
             yield return WaitForBlocksToStopFalling();
             yield return new WaitForSeconds(1);
             GetNewActiveTile();
@@ -95,12 +102,6 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
             tile.ResetMoved();
         }
         Debug.Log("Tile Finished Falling");
-    }
-
-    IEnumerator DropAndMergeTile(NumberTile tile) {
-        yield return FallTile(tile);
-        List<NumberTile> mergedTiles = MergeNeighbourTiles(tile);
-        SelectAndDropTiles(tile, mergedTiles);
     }
 
     IEnumerator WaitForBlocksToStopFalling() {
@@ -140,7 +141,8 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler {
     }
 
     void DropTile(NumberTile tile) {
-        Coroutine fallingCoroutine = StartCoroutine(DropAndMergeTile(tile));
+        tile.SetNumberHandler(this);
+        Coroutine fallingCoroutine = StartCoroutine(FallTile(tile));
         fallingTilesQueue.Enqueue(fallingCoroutine);
     }
 

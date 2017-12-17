@@ -83,7 +83,13 @@ public class NumberTile {
 
     public bool DropToFloor() {
         NumberTile floorTile = FindFloorTile(this);
-        return MoveToTile(floorTile);
+        bool tileMoved = MoveToTile(floorTile);
+
+        if (numberHandler != null && tileMoved) {
+            numberHandler.OnTileHitFloor(this);
+        }
+
+        return tileMoved;
     }
 
     public bool IsOnFloor() {
