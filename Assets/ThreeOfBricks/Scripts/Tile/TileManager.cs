@@ -33,7 +33,6 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler, INumberHandler {
     // Use this for initialization
     void Start() {
         PopulateGridWithNumberedTiles();
-        GetNewActiveTile();
         ResetFalling();
     }
 
@@ -109,15 +108,17 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler, INumberHandler {
         if (this.activeTile != null) {
             yield return FallTile(activeTile);
             ClearActiveTile();
-            yield return WaitForBlocksToStopFalling();
-            yield return spawnWait;
-            if (!IsBoardFull()) {
-                GetNewActiveTile();
-                ResetFalling();
-            }
-            else {
-                Debug.Log("board is full");
-            }
+        }
+
+        yield return WaitForBlocksToStopFalling();
+        yield return spawnWait;
+
+        if (!IsBoardFull()) {
+            GetNewActiveTile();
+            ResetFalling();
+        }
+        else {
+            Debug.Log("board is full");
         }
     }
 
