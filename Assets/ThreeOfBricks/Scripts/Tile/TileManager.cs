@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -90,9 +91,17 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler, INumberHandler {
             ClearActiveTile();
             yield return WaitForBlocksToStopFalling();
             yield return new WaitForSeconds(1);
-            GetNewActiveTile();
-            ResetFalling();
+            if (!IsBoardFull()) {
+                GetNewActiveTile();
+                ResetFalling();
+            } else {
+                Debug.Log("board is full");
+            }
         }
+    }
+
+    private bool IsBoardFull() {
+        return (new NumberTile(gameGrid, activeTileSpawnPosition).Active);
     }
 
     IEnumerator FallTile(NumberTile tile) {
