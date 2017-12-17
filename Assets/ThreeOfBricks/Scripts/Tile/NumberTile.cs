@@ -69,7 +69,16 @@ public class NumberTile {
 
     public bool MoveTile(Direction direction) {
         NumberTile neighbour = FindNeighbourTile(direction);
-        return MoveToTile(neighbour);
+        bool tileMoved = MoveToTile(neighbour);
+
+        if (numberHandler != null && tileMoved) {
+            numberHandler.OnTileMoved(this, direction);
+            if (IsOnFloor()) {
+                numberHandler.OnTileHitFloor(this);
+            }
+        }
+
+        return tileMoved;
     }
 
     public bool DropToFloor() {
@@ -129,4 +138,7 @@ public class NumberTile {
 
 public interface INumberHandler {
 
+    void OnTileMoved(NumberTile tile, Direction direction);
+
+    void OnTileHitFloor(NumberTile tile);
 }
