@@ -39,7 +39,10 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler, INumberHandler {
     }
 
     public void OnTileMoved(NumberTile tile, Direction direction) {
-
+        if (direction == Direction.down) {
+            NumberTile previousPositionTile = tile.FindNeighbourTile(Direction.up);
+            TryToDropTileAbove(previousPositionTile);
+        }
     }
 
     public void OnTileHitFloor(NumberTile tile) {
