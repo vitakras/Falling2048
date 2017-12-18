@@ -4,4 +4,7 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/ThreeOfBricks/Scenes/Game.unity
+    guid: 5fe9d18693efd7d46a84e7f4dfb90a5b

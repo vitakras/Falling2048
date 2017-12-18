@@ -547,7 +547,7 @@ Prefab:
     - target: {fileID: 224670148432071058, guid: 7be020f39b98f70469e0fed769d81168,
         type: 2}
       propertyPath: m_LocalPosition.x
-      value: -78.149994
+      value: -120
       objectReference: {fileID: 0}
     - target: {fileID: 224316486483358956, guid: 7be020f39b98f70469e0fed769d81168,
         type: 2}
@@ -1858,7 +1858,7 @@ Prefab:
     - target: {fileID: 224989633894524782, guid: 7fe7350cfad49494e9502a4ab8f8bf65,
         type: 2}
       propertyPath: m_LocalPosition.x
-      value: -93.149994
+      value: -151
       objectReference: {fileID: 0}
     - target: {fileID: 224389107213135032, guid: 7fe7350cfad49494e9502a4ab8f8bf65,
         type: 2}
@@ -1873,7 +1873,7 @@ Prefab:
     - target: {fileID: 224989633894524782, guid: 7fe7350cfad49494e9502a4ab8f8bf65,
         type: 2}
       propertyPath: m_LocalPosition.y
-      value: 0.0000019073486
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 7fe7350cfad49494e9502a4ab8f8bf65, type: 2}
@@ -2518,7 +2518,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   numberTileView: {fileID: 894685385}
-  selectableNumbers: 02000000040000000800000010000000200000004000000080000000
+  selectableNumbers: 020000000400000008000000100000002000000040000000
   style: {fileID: 11400000, guid: f45c89589e555654caee07dba2eb021d, type: 2}
 --- !u!1001 &1734690819
 Prefab:

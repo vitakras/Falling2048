@@ -119,6 +119,12 @@ public class TileManager : MonoBehaviour, INumberHandler {
     }
 
     IEnumerator FallTile(NumberTile tile) {
+        if (tile.IsOnFloor()) {
+            yield return fallWait;
+            OnTileHitFloor(tile);
+            yield break;
+        }
+
         Debug.Log("Tile Started Falling");
         while (!tile.IsOnFloor()) {
             yield return fallWait;
