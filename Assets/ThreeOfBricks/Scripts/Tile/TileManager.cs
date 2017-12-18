@@ -1,39 +1,29 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TileManager : MonoBehaviour, INumberUpdateHandler, INumberHandler {
+public class TileManager : MonoBehaviour, INumberHandler {
 
-    public GameObject numberedTilePrefab;
     public CellPosition activeTileSpawnPosition = new CellPosition(2, 0);
     public float tileFallWaitInSeconds = 0.5f;
     public float tileSpawnWaitInSeconds = 1f;
-
     public RandomTileSelector randomTileSelector;
-    public Score score;
     public GameGrid gameGrid;
-    public TileStyles style;
     public InputHandler inputHandler;
 
     private NumberTile activeTile;
-    private IEnumerator fall;
-    private bool inputEnabled = true;
-    private Queue<Coroutine> fallingTilesQueue;
     private readonly Direction[] mergeDirections = new Direction[] { Direction.left, Direction.right, Direction.down };
     private WaitForSeconds fallWait;
     private WaitForSeconds spawnWait;
+    private bool inputEnabled = true;
+    private IEnumerator fall;
+    private Queue<Coroutine> fallingTilesQueue;
+    private ITileControllerHandler handler;
 
     void Awake() {
         fallingTilesQueue = new Queue<Coroutine>();
         fallWait = new WaitForSeconds(tileFallWaitInSeconds);
         spawnWait = new WaitForSeconds(tileSpawnWaitInSeconds);
-    }
-
-    // Use this for initialization
-    void Start() {
-        PopulateGridWithNumberedTiles();
-        ResetFalling();
     }
 
     // Update is called once per frame
@@ -44,24 +34,43 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler, INumberHandler {
         HandlePlayerInput();
     }
 
-    public void Pause() {
+    public ITileControllerHandler Handler {
+        get {
+            return handler;
+        }
+
+        set {
+            handler = value;
+        }
+    }
+
+    public void EnableControl() {
+        this.inputEnabled = true;
+    }
+
+    public void DisableControl() {
+        this.inputEnabled = false;
+    }
+
+    public void StartFallingTile() {
+        fall = MakeActiveTileFall();
+        StartCoroutine(fall);
+    }
+
+    public void StopFallingTile() {
         if (fall != null) {
             StopCoroutine(fall);
         }
     }
 
-    public void Resume() {
-        ResetFalling();
-    }
-
-    public void OnNumberUpdated(NumberTileView numberTile) {
-        this.style.ApplyStyle(numberTile);
+    public void ResetFallingTile() {
+        activeTile = null;
     }
 
     public void OnTileMoved(NumberTile tile, Direction direction) {
         if (direction == Direction.down) {
             NumberTile previousPositionTile = tile.FindNeighbourTile(Direction.up);
-            TryToDropTileAbove(previousPositionTile);
+            TryToDropActiveTileAbove(previousPositionTile);
         }
     }
 
@@ -83,14 +92,6 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler, INumberHandler {
         }
     }
 
-    void ResetFalling() {
-        if (fall != null) {
-            StopCoroutine(fall);
-        }
-        fall = MakeActiveTileFall();
-        StartCoroutine(fall);
-    }
-
     void GetNewActiveTile() {
         activeTile = new NumberTile(gameGrid, activeTileSpawnPosition);
         activeTile.Activate();
@@ -98,16 +99,10 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler, INumberHandler {
         activeTile.SetNumberHandler(this);
     }
 
-    NumberTile ClearActiveTile() {
-        NumberTile tile = activeTile;
-        activeTile = null;
-        return tile;
-    }
-
     IEnumerator MakeActiveTileFall() {
         if (this.activeTile != null) {
             yield return FallTile(activeTile);
-            ClearActiveTile();
+            ResetFallingTile();
         }
 
         yield return WaitForBlocksToStopFalling();
@@ -115,14 +110,17 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler, INumberHandler {
 
         if (!IsBoardFull()) {
             GetNewActiveTile();
-            ResetFalling();
+            StartFallingTile();
         }
         else {
             Debug.Log("board is full");
+            if (handler != null) {
+                handler.OnUnableToCreateNewActiveTile();
+            }
         }
     }
 
-    private bool IsBoardFull() {
+    bool IsBoardFull() {
         return (new NumberTile(gameGrid, activeTileSpawnPosition).Active);
     }
 
@@ -153,7 +151,7 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler, INumberHandler {
         foreach (NumberTile mergedTile in mergedTiles) {
             mergedTile.DeActivate();
 
-            NumberTile neighbour = TryToDropTileAbove(mergedTile);
+            NumberTile neighbour = TryToDropActiveTileAbove(mergedTile);
             if (neighbour != null && selectedTile.IsSameCell(neighbour)) {
                 dropSelectedTile = false;
             }
@@ -164,7 +162,7 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler, INumberHandler {
         }
     }
 
-    NumberTile TryToDropTileAbove(NumberTile tile) {
+    NumberTile TryToDropActiveTileAbove(NumberTile tile) {
         NumberTile neighbour = tile.FindNeighbourTile(Direction.up);
         if (NumberTile.IsActiveTile(neighbour)) {
             DropTile(neighbour);
@@ -190,30 +188,21 @@ public class TileManager : MonoBehaviour, INumberUpdateHandler, INumberHandler {
             }
         }
 
-        int previousNumber = tile.Number;
         int multiplier = (int)Mathf.Pow(2, tiles.Count);
-        tile.Multiply(multiplier);
-
-        if (previousNumber != tile.Number) {
-            this.score.IncreaseScore(tile.Number);
-        }
-        return tiles;
-    }
-
-    void PopulateGridWithNumberedTiles() {
-        Cell[,] cells = gameGrid.GetAllCells();
-        for (int j = 0; j < gameGrid.columns; j++) {
-            for (int i = 0; i < gameGrid.rows; i++) {
-                cells[i, j].SetChild(InstantiateNumberedTile(), false);
+        if (multiplier > 1) {
+            tile.Multiply(multiplier);
+            if (handler != null) {
+                handler.OnTileMerged(tile);
             }
         }
-    }
 
-    GameObject InstantiateNumberedTile() {
-        GameObject tile = GameObject.Instantiate(numberedTilePrefab);
-        NumberTileView numberTile = tile.GetComponent<NumberTileView>();
-        numberTile.UpdateHandler = this;
-
-        return tile;
+        return tiles;
     }
+}
+
+public interface ITileControllerHandler {
+
+    void OnTileMerged(NumberTile tile);
+
+    void OnUnableToCreateNewActiveTile();
 }

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class GameGrid : MonoBehaviour {
@@ -7,10 +8,6 @@ public class GameGrid : MonoBehaviour {
     public int columns;
 
     private Cell[,] cells;
-
-    void Awake() {
-        PopulateGrid();
-    }
 
     public Cell[,] GetAllCells() {
         return cells;
@@ -32,6 +29,10 @@ public class GameGrid : MonoBehaviour {
                 cells[j, i] = CreateNewCell(j, i);
             }
         }
+    }
+
+    public void Initialize() {
+        PopulateGrid();
     }
 
     Cell CreateNewCell(int x, int y) {
