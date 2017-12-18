@@ -1,14 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class GameManager : MonoBehaviour, INumberUpdateHandler {
+public class GameManager : MonoBehaviour, INumberUpdateHandler, ITileControllerHandler {
 
     public GameObject numberedTilePrefab;
     public GameGrid gameGrid;
     public TileStyles style;
     public TileManager tileManager;
+    public Score score;
 
     public UnityEvent gameStarted = new UnityEvent();
     public UnityEvent gamePaused = new UnityEvent();
@@ -18,6 +17,7 @@ public class GameManager : MonoBehaviour, INumberUpdateHandler {
     // Use this for initialization
     void Start() {
         gameGrid.Initialize();
+        tileManager.Handler = this;
         PopulateGridWithNumberedTiles();
     }
 
@@ -44,6 +44,7 @@ public class GameManager : MonoBehaviour, INumberUpdateHandler {
     public void ResetGame() {
         tileManager.ResetFallingTile();
         ClearGrid();
+        score.ResetScore();
     }
 
     public void OnNumberUpdated(NumberTileView numberTile) {
@@ -84,5 +85,13 @@ public class GameManager : MonoBehaviour, INumberUpdateHandler {
     void EnableTileManager() {
         tileManager.EnableControl();
         tileManager.StartFallingTile();
+    }
+
+    public void OnTileMerged(NumberTile tile) {
+        this.score.IncreaseScore(tile.Number);
+    }
+
+    public void OnUnableToCreateNewActiveTile() {
+        EndGame();
     }
 }
