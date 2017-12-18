@@ -415,8 +415,8 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 278494700}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 299.5, y: 399.5, z: 0}
-  m_LocalScale: {x: 0.41614583, y: 0.41614583, z: 0.41614583}
+  m_LocalPosition: {x: 540, y: 960, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1044311137}
   - {fileID: 775247299}
@@ -1834,7 +1834,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1044311136}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.000061035156, y: 0.00012207031, z: 0}
+  m_LocalPosition: {x: 0, y: 0.00012207031, z: 0}
   m_LocalScale: {x: 1.0000119, y: 1.0000119, z: 1.0000119}
   m_Children:
   - {fileID: 1609422959}
@@ -1927,6 +1927,7 @@ MonoBehaviour:
   gameGrid: {fileID: 1949616247}
   style: {fileID: 11400000, guid: f45c89589e555654caee07dba2eb021d, type: 2}
   tileManager: {fileID: 768586208}
+  score: {fileID: 1291198082}
   gameStarted:
     m_PersistentCalls:
       m_Calls:
@@ -2170,7 +2171,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1524593903}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -619.69965, y: 0, z: 0}
+  m_LocalPosition: {x: -440, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 342557942}
