@@ -39,6 +39,7 @@ GameObject:
   - component: {fileID: 224103141665495700}
   - component: {fileID: 114513615366607296}
   - component: {fileID: 114836302980567312}
+  - component: {fileID: 114319041252776128}
   m_Layer: 5
   m_Name: HighScore
   m_TagString: Untagged
@@ -90,6 +91,20 @@ MonoBehaviour:
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
+--- !u!114 &114319041252776128
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1394077480719606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfec89f6963f8a9419d002fbda8472e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  highscore: 1
+  score: {fileID: 0}
+  scoreText: {fileID: 114760659301322448}
 --- !u!114 &114513615366607296
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -189,8 +204,8 @@ RectTransform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1394077480719606}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -389.75, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.000061034432, y: -346, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 224670148432071058}
@@ -200,7 +215,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -389.75}
+  m_AnchoredPosition: {x: -0.000061034432, y: -346}
   m_SizeDelta: {x: 0, y: 157.4}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224316486483358956
