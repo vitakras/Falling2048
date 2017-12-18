@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class TouchInputHandler : MonoBehaviour, IDragHandler, IPointerDownHandler {
 
+    public TileManager tilemanager;
     public float offset;
     private Vector2 previousPosition;
 
@@ -13,13 +14,34 @@ public class TouchInputHandler : MonoBehaviour, IDragHandler, IPointerDownHandle
     }
 
     public void OnDrag(PointerEventData eventData) {
-        float difference = previousPosition.x - eventData.position.x;
-        if (offset < Mathf.Abs(difference)) {
-            previousPosition = eventData.position;
-            if (difference < 0) {
-                Debug.Log("Move " + Direction.right);
-            } else {
-                Debug.Log("Move " + Direction.left);
+        if (previousPosition == Vector2.zero) {
+            return;
+        }
+
+        float horizontal = previousPosition.x - eventData.position.x;
+        float vertical = previousPosition.y - eventData.position.y;
+
+        if (Mathf.Abs(horizontal) > Mathf.Abs(vertical)) {
+            if (offset < Mathf.Abs(horizontal)) {
+                previousPosition = eventData.position;
+                if (horizontal < 0) {
+                    Debug.Log("Move " + Direction.right);
+                    tilemanager.HandlePlayerInput(Direction.right);
+                }
+                else {
+                    Debug.Log("Move " + Direction.left);
+                    tilemanager.HandlePlayerInput(Direction.left);
+                }
+            }
+        }
+        else {
+            if (offset < Mathf.Abs(vertical)) {
+                previousPosition = eventData.position;
+                if (vertical > 0) {
+                    Debug.Log("Move " + Direction.down);
+                    tilemanager.HandlePlayerInput(Direction.down);
+                }
+                previousPosition = Vector2.zero;
             }
         }
     }

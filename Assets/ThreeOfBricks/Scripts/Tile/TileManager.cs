@@ -9,7 +9,6 @@ public class TileManager : MonoBehaviour, INumberHandler {
     public float tileSpawnWaitInSeconds = 1f;
     public RandomTileSelector randomTileSelector;
     public GameGrid gameGrid;
-    public InputHandler inputHandler;
 
     private NumberTile activeTile;
     private readonly Direction[] mergeDirections = new Direction[] { Direction.left, Direction.right, Direction.down };
@@ -24,14 +23,6 @@ public class TileManager : MonoBehaviour, INumberHandler {
         fallingTilesQueue = new Queue<Coroutine>();
         fallWait = new WaitForSeconds(tileFallWaitInSeconds);
         spawnWait = new WaitForSeconds(tileSpawnWaitInSeconds);
-    }
-
-    // Update is called once per frame
-    void Update() {
-        if (!inputEnabled || NumberTile.IsInactiveTile(activeTile)) {
-            return;
-        }
-        HandlePlayerInput();
     }
 
     public ITileControllerHandler Handler {
@@ -79,8 +70,11 @@ public class TileManager : MonoBehaviour, INumberHandler {
         SelectAndDropTiles(tile, mergedTiles);
     }
 
-    void HandlePlayerInput() {
-        Direction direction = inputHandler.GetDirection();
+    public void HandlePlayerInput(Direction direction) {
+        if (!inputEnabled || NumberTile.IsInactiveTile(activeTile)) {
+            return;
+        }
+
         switch (direction) {
             case Direction.left:
             case Direction.right:

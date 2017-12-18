@@ -2,17 +2,17 @@ using UnityEngine;
 
 public class InputHandler : MonoBehaviour {
 
-    public Direction GetDirection() {
+    public TileManager tilemanager;
+
+    void Update() {
         if (Input.GetKeyDown(KeyCode.A)) {
-            return Direction.left;
+            tilemanager.HandlePlayerInput(Direction.left);
         }
         else if (Input.GetKeyDown(KeyCode.D)) {
-            return Direction.right;
+            tilemanager.HandlePlayerInput(Direction.right);
         }
         else if (Input.GetKeyDown(KeyCode.S)) {
-            return Direction.down;
+            tilemanager.HandlePlayerInput(Direction.down);
         }
-
-        return Direction.none;
     }
 }
