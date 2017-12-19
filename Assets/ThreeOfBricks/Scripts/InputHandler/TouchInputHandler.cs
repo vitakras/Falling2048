@@ -32,7 +32,7 @@ public class TouchInputHandler : MonoBehaviour, IDragHandler, IPointerDownHandle
                     Debug.Log("Move " + Direction.left);
                     tilemanager.HandlePlayerInput(Direction.left);
                 }
-                previousPosition = Vector2.zero;
+               // previousPosition = Vector2.zero;
             }
         }
         else {
