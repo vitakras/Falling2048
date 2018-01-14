@@ -2,22 +2,22 @@ public class NumberTile {
 
     private GameGrid grid;
     private Cell cell;
-    private NumberTileView numberTile;
+    private NumberTileView numberTileView;
     private INumberHandler numberHandler;
     private bool hasMoved;
 
     public NumberTile(GameGrid grid, CellPosition position) {
         this.grid = grid;
         cell = grid.GetCell(position);
-        numberTile = cell.GetChild().GetComponent<NumberTileView>();
+        numberTileView = cell.GetChild().GetComponent<NumberTileView>();
     }
 
     public int Number {
         set {
-            numberTile.Number = value;
+            numberTileView.Number = value;
         }
         get {
-            return numberTile.Number;
+            return numberTileView.Number;
         }
     }
 
@@ -36,6 +36,12 @@ public class NumberTile {
     public bool HasMoved {
         get {
             return hasMoved;
+        }
+    }
+
+    public NumberTileView View {
+        get {
+            return this.numberTileView;
         }
     }
 
@@ -119,8 +125,8 @@ public class NumberTile {
 
     void CopyTileProperties(NumberTile tile) {
         this.cell = tile.cell;
-        tile.numberTile.Number = this.numberTile.Number;
-        this.numberTile = tile.numberTile;
+        tile.numberTileView.Number = this.numberTileView.Number;
+        this.numberTileView = tile.numberTileView;
     }
 
     public static NumberTile FindFloorTile(NumberTile tile) {

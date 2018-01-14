@@ -9,6 +9,12 @@ public class NumberTileView : MonoBehaviour {
     public Text score;
     public INumberUpdateHandler updateHandler;
 
+    private Animator anim;
+
+    void Start() {
+        anim = GetComponent<Animator>();
+    }
+
     public int Number {
         get {
             return number;
@@ -37,6 +43,10 @@ public class NumberTileView : MonoBehaviour {
 
     public void SetTextColor(Color color) {
         this.score.color = color;
+    }
+
+    public void PlayUpdateAnimation() {
+        anim.SetTrigger("Update");
     }
 }
 
