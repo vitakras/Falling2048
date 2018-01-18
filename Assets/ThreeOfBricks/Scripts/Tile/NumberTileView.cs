@@ -46,7 +46,9 @@ public class NumberTileView : MonoBehaviour {
     }
 
     public void PlayUpdateAnimation() {
-        anim.SetTrigger("Update");
+        if (anim != null) {
+            anim.SetTrigger("update");
+        }
     }
 }
 

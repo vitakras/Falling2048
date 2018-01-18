@@ -2,27 +2,34 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TileManager : MonoBehaviour, INumberHandler {
+public class TileManager : MonoBehaviour {
 
     public CellPosition activeTileSpawnPosition = new CellPosition(2, 0);
     public float tileFallWaitInSeconds = 0.5f;
     public float tileSpawnWaitInSeconds = 1f;
+    public float mergeTileDelayInSeconds = 0.5f;
     public RandomTileSelector randomTileSelector;
     public GameGrid gameGrid;
 
     private NumberTile activeTile;
-    private readonly Direction[] mergeDirections = new Direction[] { Direction.left, Direction.right, Direction.down };
+    private readonly Direction[] mergeDirections = new Direction[] { Direction.left, Direction.right, Direction.down, Direction.up };
     private WaitForSeconds fallWait;
     private WaitForSeconds spawnWait;
+    private WaitForSeconds mergeWait;
     private bool inputEnabled = true;
     private IEnumerator fall;
     private Queue<Coroutine> fallingTilesQueue;
     private ITileControllerHandler handler;
 
+    private Queue<NumberTile> fallingTiles;
+
     void Awake() {
         fallingTilesQueue = new Queue<Coroutine>();
+        fallingTiles = new Queue<NumberTile>();
+
         fallWait = new WaitForSeconds(tileFallWaitInSeconds);
         spawnWait = new WaitForSeconds(tileSpawnWaitInSeconds);
+        mergeWait = new WaitForSeconds(mergeTileDelayInSeconds);
     }
 
     public ITileControllerHandler Handler {
@@ -58,18 +65,6 @@ public class TileManager : MonoBehaviour, INumberHandler {
         activeTile = null;
     }
 
-    public void OnTileMoved(NumberTile tile, Direction direction) {
-        if (direction == Direction.down) {
-            NumberTile previousPositionTile = tile.FindNeighbourTile(Direction.up);
-            TryToDropActiveTileAbove(previousPositionTile);
-        }
-    }
-
-    public void OnTileHitFloor(NumberTile tile) {
-        List<NumberTile> mergedTiles = MergeNeighbourTiles(tile);
-        SelectAndDropTiles(tile, mergedTiles);
-    }
-
     public void HandlePlayerInput(Direction direction) {
         if (!inputEnabled || NumberTile.IsInactiveTile(activeTile)) {
             return;
@@ -82,6 +77,7 @@ public class TileManager : MonoBehaviour, INumberHandler {
                 break;
             case Direction.down:
                 activeTile.DropToFloor();
+                DisableControl();
                 break;
         }
     }
@@ -90,21 +86,20 @@ public class TileManager : MonoBehaviour, INumberHandler {
         activeTile = new NumberTile(gameGrid, activeTileSpawnPosition);
         activeTile.Activate();
         activeTile.Number = randomTileSelector.GetRandomTileNumber();
-        activeTile.SetNumberHandler(this);
     }
 
     IEnumerator MakeActiveTileFall() {
         if (this.activeTile != null) {
-            yield return FallTile(activeTile);
+            yield return FallAndMergeTile(activeTile);
             ResetFallingTile();
         }
 
-        yield return WaitForBlocksToStopFalling();
         yield return spawnWait;
 
         if (!IsBoardFull()) {
             GetNewActiveTile();
             StartFallingTile();
+            EnableControl();
         }
         else {
             Debug.Log("board is full");
@@ -120,83 +115,91 @@ public class TileManager : MonoBehaviour, INumberHandler {
 
     IEnumerator FallTile(NumberTile tile) {
         if (tile.IsOnFloor()) {
-            yield return fallWait;
-            OnTileHitFloor(tile);
             yield break;
         }
 
-        Debug.Log("Tile Started Falling");
-        while (!tile.IsOnFloor()) {
+        List<NumberTile> aboveTiles = NumberTile.FindActiveTilesInDirection(tile, Direction.up);
+        do {
             yield return fallWait;
-            if (!tile.HasMoved) {
-                tile.MoveTile(Direction.down);
+
+            tile.MoveTile(Direction.down);
+            foreach (NumberTile aboveTile in aboveTiles) {
+                aboveTile.MoveTile(Direction.down);
             }
-            tile.ResetMoved();
+        } while (!tile.IsOnFloor());
+
+        // Add tiles to the queue to process later
+        fallingTiles.Enqueue(tile);
+        foreach (NumberTile aboveTile in aboveTiles) {
+            fallingTiles.Enqueue(aboveTile);
         }
-        Debug.Log("Tile Finished Falling");
     }
 
-    IEnumerator WaitForBlocksToStopFalling() {
+    IEnumerator FallAndMergeTile(NumberTile tile) {
+        yield return FallTile(tile);
+
+        if (activeTile != null && tile == activeTile) {
+            DisableControl();
+        }
+
+        if (fallingTiles.Count != 0) {
+            yield return new WaitForSeconds(0.2f);
+        }
+
+        List<NumberTile> mergedTiles = new List<NumberTile>();
+        while (fallingTiles.Count != 0) {
+            NumberTile fallingTile = fallingTiles.Dequeue();
+            if (MergeNeighbourTiles(fallingTile, ref mergedTiles)) {
+                yield return null;
+
+                // Play and wait for animation to finish
+                fallingTile.View.PlayUpdateAnimation();
+                yield return new WaitForSeconds(1);
+
+                // Add the Tile again to see if it can merge with anything else
+                if (fallingTile.IsOnFloor()) {
+                    fallingTiles.Enqueue(fallingTile);
+                }
+            }
+        }
+
+        Queue<Coroutine> fallingTilesQueue = new Queue<Coroutine>();
+        foreach (NumberTile mergedTile in mergedTiles) {
+            NumberTile neighbour = NumberTile.TryFindActiveTopTile(mergedTile);
+            if (NumberTile.IsActiveTile(neighbour)) {
+                Coroutine c = StartCoroutine(FallAndMergeTile(neighbour));
+                fallingTilesQueue.Enqueue(c);
+            }
+        }
+
         while (fallingTilesQueue.Count != 0) {
             yield return fallingTilesQueue.Dequeue();
         }
     }
 
-    void SelectAndDropTiles(NumberTile selectedTile, List<NumberTile> mergedTiles) {
-        if (mergedTiles.Count == 0) {
-            return;
-        }
-
-        bool dropSelectedTile = true;
-        foreach (NumberTile mergedTile in mergedTiles) {
-            mergedTile.DeActivate();
-
-            NumberTile neighbour = TryToDropActiveTileAbove(mergedTile);
-            if (neighbour != null && selectedTile.IsSameCell(neighbour)) {
-                dropSelectedTile = false;
-            }
-        }
-
-        if (dropSelectedTile) {
-            DropTile(selectedTile);
-        }
-    }
-
-    NumberTile TryToDropActiveTileAbove(NumberTile tile) {
-        NumberTile neighbour = tile.FindNeighbourTile(Direction.up);
-        if (NumberTile.IsActiveTile(neighbour)) {
-            DropTile(neighbour);
-            return neighbour;
-        }
-
-        return null;
-    }
-
-    void DropTile(NumberTile tile) {
-        tile.SetNumberHandler(this);
-        Coroutine fallingCoroutine = StartCoroutine(FallTile(tile));
-        fallingTilesQueue.Enqueue(fallingCoroutine);
-    }
-
-    List<NumberTile> MergeNeighbourTiles(NumberTile tile) {
-        List<NumberTile> tiles = new List<NumberTile>();
+    bool MergeNeighbourTiles(NumberTile tile, ref List<NumberTile> mergedTiles) {
+        int mergeCount = 0;
 
         foreach (Direction direction in mergeDirections) {
             NumberTile neighbour = tile.FindNeighbourTile(direction);
             if (NumberTile.IsActiveTile(neighbour) && tile.IsEqualNumber(neighbour)) {
-                tiles.Add(neighbour);
+                neighbour.DeActivate();
+                mergedTiles.Add(neighbour);
+                mergeCount++;
             }
         }
 
-        int multiplier = (int)Mathf.Pow(2, tiles.Count);
+        int multiplier = (int)Mathf.Pow(2, mergeCount);
         if (multiplier > 1) {
             tile.Multiply(multiplier);
             if (handler != null) {
                 handler.OnTileMerged(tile);
             }
+
+            return true;
         }
 
-        return tiles;
+        return false;
     }
 }
 

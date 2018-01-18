@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 public class NumberTile {
 
     private GameGrid grid;
@@ -75,27 +77,12 @@ public class NumberTile {
 
     public bool MoveTile(Direction direction) {
         NumberTile neighbour = FindNeighbourTile(direction);
-        bool tileMoved = MoveToTile(neighbour);
-
-        if (numberHandler != null && tileMoved) {
-            numberHandler.OnTileMoved(this, direction);
-            if (IsOnFloor()) {
-                numberHandler.OnTileHitFloor(this);
-            }
-        }
-
-        return tileMoved;
+        return MoveToTile(neighbour);
     }
 
     public bool DropToFloor() {
         NumberTile floorTile = FindFloorTile(this);
-        bool tileMoved = MoveToTile(floorTile);
-
-        if (numberHandler != null && tileMoved) {
-            numberHandler.OnTileHitFloor(this);
-        }
-
-        return tileMoved;
+        return MoveToTile(floorTile);
     }
 
     public bool IsOnFloor() {
@@ -139,6 +126,33 @@ public class NumberTile {
         return tile;
     }
 
+    public static NumberTile TryFindActiveTopTile(NumberTile tile) {
+        NumberTile nextTile = tile.FindNeighbourTile(Direction.up);
+        while (IsInactiveTile(nextTile)) {
+            tile = nextTile;
+            nextTile = tile.FindNeighbourTile(Direction.up);
+        }
+
+        if (IsActiveTile(nextTile)) {
+            return nextTile;
+        }
+
+
+        return null;
+    }
+
+    public static List<NumberTile> FindActiveTilesInDirection(NumberTile tile, Direction dir) {
+        List<NumberTile> tiles = new List<NumberTile>();
+
+        NumberTile nextTile = tile.FindNeighbourTile(dir);
+        while (IsActiveTile(nextTile)) {
+            tiles.Add(nextTile);
+            nextTile = nextTile.FindNeighbourTile(dir);
+        }
+
+        return tiles;
+    }
+
     public static bool IsInactiveTile(NumberTile tile) {
         return tile != null && !tile.Active;
     }
@@ -152,5 +166,4 @@ public interface INumberHandler {
 
     void OnTileMoved(NumberTile tile, Direction direction);
 
-    void OnTileHitFloor(NumberTile tile);
 }

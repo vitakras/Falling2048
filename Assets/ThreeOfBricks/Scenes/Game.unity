@@ -1371,6 +1371,7 @@ MonoBehaviour:
     y: 0
   tileFallWaitInSeconds: 0.5
   tileSpawnWaitInSeconds: 1
+  mergeTileDelayInSeconds: 1.1
   randomTileSelector: {fileID: 1727482233}
   gameGrid: {fileID: 1949616247}
 --- !u!4 &768586209
