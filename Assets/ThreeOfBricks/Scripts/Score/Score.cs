@@ -23,6 +23,7 @@ public class Score : MonoBehaviour {
 
             if (score > highscore) {
                 highscore = score;
+                Save();
             }
 
             onScoreUpdated.Invoke();
